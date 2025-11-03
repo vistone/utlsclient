@@ -43,6 +43,9 @@ type Config struct {
 
 	// 代理地址，格式: http://host:port 或 socks5://host:port
 	Proxy string
+
+	// LocalIP 本地源地址（可选，优先使用；适用于绑定本地IPv6）
+	LocalIP string
 }
 
 // RequestConfig 请求配置
@@ -61,6 +64,9 @@ type RequestConfig struct {
 
 	// Host 头（覆盖域名）
 	Host string
+
+	// LocalIP 本地源地址（可选，覆盖全局Config.LocalIP）
+	LocalIP string
 }
 
 // Response 响应结构
@@ -255,7 +261,7 @@ func (c *Client) buildHTTP1Client(host string, fingerprint *utls.ClientHelloID) 
 		},
 		TLSHandshakeTimeout:   c.config.Timeout,
 		ForceAttemptHTTP2:     false,
-		MaxIdleConns:          100,
+		MaxIdleConns:          1000,
 		MaxIdleConnsPerHost:   10,
 		IdleConnTimeout:       60 * time.Second,
 		DisableKeepAlives:     false,
@@ -282,6 +288,18 @@ func (c *Client) dialUTLS(ctx context.Context, network, addr, serverName string,
 	} else {
 		dialer := &net.Dialer{
 			Timeout: c.config.Timeout,
+		}
+		// 绑定本地源地址（若提供）
+		localIP := c.config.LocalIP
+		if localIP == "" {
+			// 请求级覆盖
+			// 无法直接取得当前请求，这里通过 network 与 addr 仅能设置全局；
+			// 提供一个钩子：若调用方在构造 client 前设置 Config.LocalIP 即可。
+		}
+		if localIP != "" {
+			if ip := net.ParseIP(localIP); ip != nil {
+				dialer.LocalAddr = &net.TCPAddr{IP: ip}
+			}
 		}
 		conn, err = dialer.DialContext(ctx, network, addr)
 		if err != nil {

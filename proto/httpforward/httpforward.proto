@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package httpforward;
+
+option go_package = "utls_client/proto/httpforward";
+
+// HTTP 转发服务
+service HTTPForwardService {
+    // 客户端握手（首次连接，获取编码）
+    rpc Handshake(HandshakeRequest) returns (HandshakeResponse);
+    
+    // 转发 HTTP 请求（使用 uTLS 客户端）
+    rpc ForwardRequest(ForwardRequestRequest) returns (ForwardRequestResponse);
+}
+
+// 握手请求（首次连接）
+message HandshakeRequest {
+    string client_ip = 1;  // 客户端 IP 地址（仅首次需要）
+}
+
+// 握手响应（分配编码）
+message HandshakeResponse {
+    int32 client_code = 1;  // 分配的客户端编码（1,2,3,4...）
+}
+
+// 转发请求
+message ForwardRequestRequest {
+    oneof client_id {
+        string client_ip = 1;      // 客户端 IP（首次使用）
+        int32 client_code = 2;     // 客户端编码（后续使用，节省流量）
+    }
+    oneof hostname {
+        string hostname_raw = 3;   // 原始主机名（首次使用）
+        int32 hostname_code = 4;   // 主机名编码（后续使用，节省流量）
+    }
+    string path = 5;               // 请求路径
+}
+
+// 转发响应
+message ForwardRequestResponse {
+    int32 client_code = 1;      // 客户端编码（回显）
+    int32 hostname_code = 2;     // 主机名编码（回显）
+    string path = 3;             // 路径（回显）
+    bytes body = 4;              // 响应体（仅状态码 200 时返回，其他状态码为空）
+    int32 status_code = 5;       // HTTP 状态码
+}

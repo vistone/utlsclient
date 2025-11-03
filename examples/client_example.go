@@ -8,7 +8,7 @@ import (
 	utls "github.com/refraction-networking/utls"
 )
 
-func main2() {
+func main() {
 	// 示例 1: 使用默认客户端
 	fmt.Println("=== 示例 1: 默认客户端 ===")
 	demo1()

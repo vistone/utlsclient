@@ -5,7 +5,7 @@ import (
 	"utls_client/fingerprint"
 )
 
-func mainFingerprintDemo() {
+func main() {
 	// 创建指纹库
 	lib := fingerprint.NewFingerprintLibrary()
 

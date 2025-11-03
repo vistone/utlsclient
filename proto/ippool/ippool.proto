@@ -1,0 +1,333 @@
+syntax = "proto3";
+
+package ippool;
+
+option go_package = "utls_client/proto/ippool";
+
+import "google/protobuf/timestamp.proto";
+
+// IP 池服务
+service IPPoolService {
+    // 获取所有主机列表
+    rpc GetAllHosts(GetAllHostsRequest) returns (GetAllHostsResponse);
+
+    // 获取指定主机信息
+    rpc GetHostInfo(GetHostInfoRequest) returns (GetHostInfoResponse);
+
+    // 获取简化格式 IP 池数据
+    rpc GetIPPool(GetIPPoolRequest) returns (GetIPPoolResponse);
+
+    // 获取详细格式 IP 池数据
+    rpc GetDetailIPPool(GetDetailIPPoolRequest) returns (GetDetailIPPoolResponse);
+
+    // 获取指定 IP 的详细信息
+    rpc GetIPDetail(GetIPDetailRequest) returns (GetIPDetailResponse);
+
+    // 搜索 IP（支持多条件）
+    rpc SearchIPs(SearchIPsRequest) returns (SearchIPsResponse);
+
+    // 获取随机 IP
+    rpc GetRandomIP(GetRandomIPRequest) returns (GetRandomIPResponse);
+
+    // 获取指定主机的所有 IP
+    rpc GetAllIPsByHost(GetAllIPsByHostRequest) returns (GetAllIPsByHostResponse);
+
+    // 分析所有数据
+    rpc AnalyzeAll(AnalyzeAllRequest) returns (AnalyzeAllResponse);
+
+    // 分析指定主机
+    rpc AnalyzeByHost(AnalyzeByHostRequest) returns (AnalyzeByHostResponse);
+
+    // 按国家分析
+    rpc AnalyzeByCountry(AnalyzeByCountryRequest) returns (AnalyzeByCountryResponse);
+
+    // 按城市分析
+    rpc AnalyzeByCity(AnalyzeByCityRequest) returns (AnalyzeByCityResponse);
+
+    // 按 ISP 分析
+    rpc AnalyzeByISP(AnalyzeByISPRequest) returns (AnalyzeByISPResponse);
+
+    // 按数据中心分析
+    rpc AnalyzeByDataCenter(AnalyzeByDataCenterRequest) returns (AnalyzeByDataCenterResponse);
+
+    // 按国家和城市分组查询
+    rpc GetCountriesList(GetCountriesListRequest) returns (GetCountriesListResponse);
+    rpc GetCitiesByCountry(GetCitiesByCountryRequest) returns (GetCitiesByCountryResponse);
+    rpc GetIPsByCountryAndCity(GetIPsByCountryAndCityRequest) returns (GetIPsByCountryAndCityResponse);
+
+    // 同步操作
+    rpc SyncAll(SyncAllRequest) returns (SyncAllResponse);
+    rpc SyncHosts(SyncHostsRequest) returns (SyncHostsResponse);
+    rpc SyncIPPool(SyncIPPoolRequest) returns (SyncIPPoolResponse);
+    rpc SyncDetailIPPool(SyncDetailIPPoolRequest) returns (SyncDetailIPPoolResponse);
+
+    // 获取服务状态
+    rpc GetServiceStatus(GetServiceStatusRequest) returns (GetServiceStatusResponse);
+}
+
+// 主机信息
+message HostInfo {
+    string host = 1;           // 主机名
+    string file_name = 2;      // 简化格式文件名
+    string detail_file = 3;   // 详细格式文件名
+    string url = 4;           // 简化格式 URL
+    string detail_url = 5;    // 详细格式 URL
+    bool exists = 6;          // 简化格式是否存在
+    bool detail_exists = 7;   // 详细格式是否存在
+}
+
+// IP 地理位置信息
+message IPLocationInfo {
+    string country = 1;       // 国家
+    string region = 2;        // 地区
+    string city = 3;          // 城市
+    string isp = 4;           // ISP
+    string org = 5;           // 组织
+    string data_center = 6;   // 数据中心
+    string ip_type = 7;       // IP 类型
+}
+
+// IP 详细信息
+message IPDetailInfo {
+    string ip = 1;                    // IP 地址
+    IPLocationInfo location = 2;       // 地理位置信息
+}
+
+// IP 池统计信息
+message PoolStats {
+    int32 ipv4_count = 1;             // IPv4 数量
+    int32 ipv6_count = 2;             // IPv6 数量
+    google.protobuf.Timestamp last_updated = 3;  // 最后更新时间
+}
+
+// 详细 IP 池数据
+message DetailIPPoolData {
+    map<string, IPDetailInfo> ips = 1;  // IP -> 详细信息映射
+    PoolStats stats = 2;                 // 统计信息
+}
+
+// 分析统计信息
+message AnalyzeStats {
+    int32 total_hosts = 1;              // 主机总数
+    int32 total_ipv4 = 2;                // IPv4 总数
+    int32 total_ipv6 = 3;                // IPv6 总数
+    map<string, int32> countries = 4;    // 国家分布
+    map<string, int32> cities = 5;        // 城市分布
+    map<string, int32> regions = 6;       // 地区分布
+    map<string, int32> isps = 7;         // ISP 分布
+    map<string, int32> orgs = 8;         // 组织分布
+    map<string, int32> data_centers = 9; // 数据中心分布
+    map<string, int32> ip_types = 10;    // IP 类型分布
+}
+
+// 请求和响应消息
+
+// GetAllHosts
+message GetAllHostsRequest {}
+
+message GetAllHostsResponse {
+    repeated HostInfo hosts = 1;
+}
+
+// GetHostInfo
+message GetHostInfoRequest {
+    string host = 1;
+}
+
+message GetHostInfoResponse {
+    HostInfo host_info = 1;
+}
+
+// GetIPPool
+message GetIPPoolRequest {
+    string host = 1;
+}
+
+message GetIPPoolResponse {
+    repeated string ipv4 = 1;
+    repeated string ipv6 = 2;
+}
+
+// GetDetailIPPool
+message GetDetailIPPoolRequest {
+    string host = 1;
+}
+
+message GetDetailIPPoolResponse {
+    map<string, IPDetailInfo> ips = 1;  // IP -> 详细信息
+    PoolStats stats = 2;                 // 统计信息
+}
+
+// GetIPDetail
+message GetIPDetailRequest {
+    string host = 1;
+    string ip = 2;
+}
+
+message GetIPDetailResponse {
+    IPDetailInfo ip_detail = 1;
+}
+
+// SearchIPs
+message SearchIPsRequest {
+    string host = 1;        // 主机名（可选，为空则搜索所有主机）
+    string country = 2;     // 国家（可选）
+    string city = 3;        // 城市（可选）
+    string isp = 4;        // ISP（可选）
+    string data_center = 5; // 数据中心（可选）
+}
+
+message SearchIPsResponse {
+    repeated IPDetailInfo ips = 1;
+}
+
+// GetRandomIP
+message GetRandomIPRequest {
+    string host = 1;
+}
+
+message GetRandomIPResponse {
+    string ip = 1;
+}
+
+// GetAllIPsByHost
+message GetAllIPsByHostRequest {
+    string host = 1;
+}
+
+message GetAllIPsByHostResponse {
+    repeated string ipv4 = 1;
+    repeated string ipv6 = 2;
+}
+
+// AnalyzeAll
+message AnalyzeAllRequest {}
+
+message AnalyzeAllResponse {
+    AnalyzeStats stats = 1;
+}
+
+// AnalyzeByHost
+message AnalyzeByHostRequest {
+    string host = 1;
+}
+
+message AnalyzeByHostResponse {
+    AnalyzeStats stats = 1;
+}
+
+// AnalyzeByCountry
+message AnalyzeByCountryRequest {
+    string country = 1;
+}
+
+message AnalyzeByCountryResponse {
+    repeated IPDetailInfo ips = 1;
+}
+
+// AnalyzeByCity
+message AnalyzeByCityRequest {
+    string city = 1;
+}
+
+message AnalyzeByCityResponse {
+    repeated IPDetailInfo ips = 1;
+}
+
+// AnalyzeByISP
+message AnalyzeByISPRequest {
+    string isp = 1;
+}
+
+message AnalyzeByISPResponse {
+    repeated IPDetailInfo ips = 1;
+}
+
+// AnalyzeByDataCenter
+message AnalyzeByDataCenterRequest {
+    string data_center = 1;
+}
+
+message AnalyzeByDataCenterResponse {
+    repeated IPDetailInfo ips = 1;
+}
+
+// SyncAll
+message SyncAllRequest {
+    bool force = 1;  // 是否强制同步
+}
+
+message SyncAllResponse {
+    bool success = 1;
+    string message = 2;
+}
+
+// SyncHosts
+message SyncHostsRequest {}
+
+message SyncHostsResponse {
+    bool success = 1;
+    string message = 2;
+    int32 host_count = 3;
+}
+
+// SyncIPPool
+message SyncIPPoolRequest {
+    string host = 1;
+}
+
+message SyncIPPoolResponse {
+    bool success = 1;
+    string message = 2;
+    int32 ipv4_count = 3;
+    int32 ipv6_count = 4;
+}
+
+// SyncDetailIPPool
+message SyncDetailIPPoolRequest {
+    string host = 1;
+    bool force = 2;  // 是否强制更新
+}
+
+message SyncDetailIPPoolResponse {
+    bool success = 1;
+    string message = 2;
+    int32 ip_count = 3;
+}
+
+// GetServiceStatus
+message GetServiceStatusRequest {}
+
+message GetServiceStatusResponse {
+    bool offline_mode = 1;                            // 是否离线模式
+    bool auto_sync_enabled = 2;                       // 自动同步是否启用
+    google.protobuf.Timestamp last_sync_time = 3;     // 最后同步时间
+    int32 total_hosts = 4;                            // 主机总数
+    int32 loaded_hosts = 5;                           // 已加载主机数
+}
+
+// GetCountriesList
+message GetCountriesListRequest {}
+
+message GetCountriesListResponse {
+    map<string, int32> countries = 1;  // 国家名称 -> IP 数量
+}
+
+// GetCitiesByCountry
+message GetCitiesByCountryRequest {
+    string country = 1;
+}
+
+message GetCitiesByCountryResponse {
+    map<string, int32> cities = 1;  // 城市名称 -> IP 数量
+}
+
+// GetIPsByCountryAndCity
+message GetIPsByCountryAndCityRequest {
+    string country = 1;  // 国家（可选，为空则返回所有国家）
+    string city = 2;     // 城市（可选，为空则返回该国家的所有城市）
+}
+
+message GetIPsByCountryAndCityResponse {
+    repeated IPDetailInfo ips = 1;  // IP 列表
+}

@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package rocktreeTasks;
+
+option go_package = "utls_client/proto/rocktreeTasks";
+
+// 任务类型枚举
+enum Type {
+    BULK_METADATA = 0;  // 批量元数据
+    NODE_DATA = 1;      // 节点数据
+}
+
+// 任务请求
+message TaskRequest {
+    string client_id = 1;        // 客户端 ID
+    Type type = 2;                // 任务类型
+    string tilekey = 3;           // 瓦片键
+    int32 epoch = 4;              // 纪元
+    int32 imagery_epoch = 5;      // 图像纪元（可选，允许为空）
+}
+
+// 任务响应
+message TaskResponse {
+    string client_id = 1;         // 客户端 ID（回显）
+    Type type = 2;                // 任务类型（回显）
+    string tilekey = 3;           // 瓦片键（回显）
+    int32 epoch = 4;              // 纪元（回显）
+    int32 imagery_epoch = 5;       // 图像纪元（回显，允许为空）
+    bytes body = 6;                // 响应体（仅状态码 200 时返回，其他状态码为空）
+    int32 status_code = 7;        // HTTP 状态码
+}
+
+// RockTree 任务服务
+service RockTreeTaskService {
+    // 处理任务请求
+    rpc ProcessTask(TaskRequest) returns (TaskResponse);
+}

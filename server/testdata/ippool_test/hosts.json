@@ -1,0 +1,23 @@
+{
+  "hosts": [
+    {
+      "host": "kh.google.com",
+      "file_name": "kh_google_com.json",
+      "detail_file": "kh_google_com_detail.json",
+      "url": "/api/ippool/kh_google_com.json",
+      "detail_url": "/api/ippool/kh_google_com_detail.json",
+      "exists": true,
+      "detail_exists": true
+    },
+    {
+      "host": "keyhole.l.google.com",
+      "file_name": "keyhole_l_google_com.json",
+      "detail_file": "keyhole_l_google_com_detail.json",
+      "url": "/api/ippool/keyhole_l_google_com.json",
+      "detail_url": "/api/ippool/keyhole_l_google_com_detail.json",
+      "exists": true,
+      "detail_exists": true
+    }
+  ],
+  "usage": ""
+}
